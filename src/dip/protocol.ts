@@ -18,6 +18,10 @@ export const MAX_COMMAND_LENGTH = 64;
 /** The highest design index (mux address). */
 export const MAX_DESIGN = 1023;
 
+export function clampDesign(design: number) {
+  return Math.max(0, Math.min(MAX_DESIGN, design));
+}
+
 /** From `read_shuttle()`. */
 export interface IDipInfo {
   shuttle: string | null;

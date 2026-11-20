@@ -28,7 +28,7 @@ import {
 import { useState } from 'react';
 import { formatHz } from '~/dip/clock';
 import type { DipDevice } from '~/dip/DipDevice';
-import { MAX_DESIGN, sameSettings, type IDipSettings } from '~/dip/protocol';
+import { clampDesign, MAX_DESIGN, sameSettings, type IDipSettings } from '~/dip/protocol';
 import { useDeviceSnapshot } from '~/dip/useDeviceSnapshot';
 import { findProject } from '~/model/shuttle';
 import type { IShuttleStatus } from '~/model/useShuttle';
@@ -154,7 +154,7 @@ export function StartupPanel(props: IStartupPanelProps) {
           value={draft.defaultDesign}
           disabled={busy}
           slotProps={{ htmlInput: { min: 0, max: MAX_DESIGN, 'data-testid': 'default-index' } }}
-          onChange={(e) => patch({ defaultDesign: Math.max(0, parseInt(e.target.value, 10) || 0) })}
+          onChange={(e) => patch({ defaultDesign: clampDesign(parseInt(e.target.value, 10) || 0) })}
         />
         <Button
           onClick={useCurrent}

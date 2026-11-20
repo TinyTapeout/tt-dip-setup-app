@@ -15,7 +15,7 @@ import { Alert, Button, Chip, Stack, TextField, Tooltip, Typography } from '@mui
 import { useState } from 'react';
 import { formatHz } from '~/dip/clock';
 import type { DipDevice, ICommandResult } from '~/dip/DipDevice';
-import { MAX_DESIGN } from '~/dip/protocol';
+import { clampDesign, MAX_DESIGN } from '~/dip/protocol';
 import { useDeviceSnapshot } from '~/dip/useDeviceSnapshot';
 import { findProject, projectLinks, type IProject } from '~/model/shuttle';
 import type { IShuttleStatus } from '~/model/useShuttle';
@@ -70,7 +70,7 @@ export function ControlPanel(props: IControlPanelProps) {
     if (Number.isNaN(address)) {
       return;
     }
-    setDesign(Math.max(0, Math.min(MAX_DESIGN, address)));
+    setDesign(clampDesign(address));
     const project = findProject(projects, address);
     if (project?.clock_hz) {
       setClockHz(project.clock_hz);
