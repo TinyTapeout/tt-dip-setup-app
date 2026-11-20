@@ -3,7 +3,7 @@
 
 import { effectiveClockHz, MAX_CLOCK_HZ } from './clock';
 import type { IDipLink } from './link';
-import { PROMPT, type IDipSettings } from './protocol';
+import { MAX_DESIGN, PROMPT, type IDipSettings } from './protocol';
 
 export interface ISimulatedDipOptions {
   shuttle?: string;
@@ -13,7 +13,7 @@ export interface ISimulatedDipOptions {
 }
 
 /**
- * Simulates the TT-DIP firmware (v0.9.8) closely enough to develop and test the app without
+ * Simulates the TT-DIP firmware (v1.0.0) closely enough to develop and test the app without
  * hardware: input echo, the prompt, the `key=value` dumps, the debug-level filtered messages, and
  * the effect of each command on the settings and state.
  */
@@ -36,7 +36,7 @@ export class SimulatedDip implements IDipLink {
     resetOnLoadClocks: 5,
     debugLevel: 3,
   };
-  flash: IDipSettings | null = null;
+  flash: IDipSettings;
   design = 0;
   clockHz = 0;
   /** Every command line parsed, for tests. */
@@ -44,9 +44,12 @@ export class SimulatedDip implements IDipLink {
 
   constructor(options: ISimulatedDipOptions = {}) {
     this.shuttle = options.shuttle ?? 'ttgf0p2';
-    this.firmwareVersion = options.firmwareVersion ?? '0.9.8';
+    this.firmwareVersion = options.firmwareVersion ?? '1.0.0';
     this.latencyMs = options.latencyMs ?? 0;
     this.settings = { ...this.settings, ...options.settings };
+    // The flash starts erased, so the first boot stores the settings there.
+    this.info('Settings never saved, storing defaults');
+    this.flash = { ...this.settings };
     this.boot();
   }
 
@@ -115,10 +118,8 @@ export class SimulatedDip implements IDipLink {
   }
 
   private boot() {
-    if (this.flash) {
-      this.settings = { ...this.flash };
-    }
-    this.design = 0;
+    this.settings = { ...this.flash };
+    // Without a default design, the mux keeps the design selected before the restart.
     this.clockHz = 0;
     if (this.settings.defaultDesign) {
       if (this.settings.muxExternal) {
@@ -141,7 +142,11 @@ export class SimulatedDip implements IDipLink {
   private enableDesign(id: number) {
     this.out(`Enable project ${id}`);
     if (this.settings.muxExternal) {
-      this.info("MUX can't enable -- driven externally");
+      this.error("MUX can't enable -- driven externally");
+      return;
+    }
+    if (id > MAX_DESIGN) {
+      this.error('Design ID out of bounds');
       return;
     }
     this.design = id;

@@ -47,16 +47,12 @@ Firefox 151+) is needed to connect to a real one.
 - Only `key=value` lines are parsed (`read_shuttle()`, `dump_state()`, `dump_settings()`). After a command that
   changes state or settings, the app re-reads `dump_state()` / `dump_settings()` rather than parsing the
   human-readable messages, which depend on the debug level. `ERROR:` lines are shown to the user when the board
-  emits them (debug level >= 1).
+  emits them (debug level >= 1); without them, the app checks the state to tell whether a command failed.
+- `select_design()` stops the clock unless given a rate, so the app passes the rate when it is non-zero.
 - `src/dip/clock.ts` mirrors the firmware's `calc_pwm_nm()` (48 MHz timer, 24 MHz maximum), so the UI shows the
   quantized rate the board will actually produce before sending it.
 - `restart()` gets a 10 s timeout, since the boot sequence clocks the mux once per design index.
-
-Firmware quirks the app works around:
-
-- `select_design()` without a clock argument stops the clock, so the app always passes the rate when it is
-  non-zero.
-- `set_mux_ext()` reconfigures the clock/reset pins instead of the mux pins.
+- The app targets firmware v1.0.0 and later.
 
 ## License
 

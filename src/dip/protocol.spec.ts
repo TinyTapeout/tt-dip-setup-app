@@ -19,12 +19,12 @@ describe('parseInfo', () => {
       'repo=TinyTapeout/tinytapeout-gf-0p2',
       'shuttle=ttgf0p2',
       'board=dip',
-      'dipfw=0.9.8',
+      'dipfw=1.0.0',
     ];
     expect(parseInfo(lines)).toEqual({
       shuttle: 'ttgf0p2',
       board: 'dip',
-      firmwareVersion: '0.9.8',
+      firmwareVersion: '1.0.0',
     });
   });
 

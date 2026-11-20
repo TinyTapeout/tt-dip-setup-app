@@ -28,7 +28,7 @@ async function connectSimulated(page: Page) {
   await page.goto('/?mock=1&factory=1');
   await page.getByRole('button', { name: 'Simulated board' }).click();
   await expect(page.getByRole('link', { name: 'ttgf0p2' })).toBeVisible();
-  await expect(page.getByText(/^Firmware:/)).toContainText('0.9.8');
+  await expect(page.getByText(/^Firmware:/)).toContainText('1.0.0');
 }
 
 test('connects, selects a project and sets the clock', async ({ page }) => {

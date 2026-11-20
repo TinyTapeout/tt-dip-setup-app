@@ -81,6 +81,9 @@ export function ControlPanel(props: IControlPanelProps) {
   const select = () =>
     runCommand(async () => {
       const result = await props.device.selectDesign(design, clockHz);
+      if (result.errors.length) {
+        return result;
+      }
       const { state } = props.device.getSnapshot();
       if (state.design !== design) {
         result.errors.push(

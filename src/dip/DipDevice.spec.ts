@@ -20,7 +20,7 @@ describe('DipDevice', () => {
     const snapshot = device.getSnapshot();
     expect(snapshot.connected).toBe(true);
     expect(snapshot.info.shuttle).toBe('ttsky25a');
-    expect(snapshot.info.firmwareVersion).toBe('0.9.8');
+    expect(snapshot.info.firmwareVersion).toBe('1.0.0');
     expect(snapshot.settings.defaultDesign).toBe(42);
     expect(snapshot.state.design).toBe(42); // loaded on boot
     expect(snapshot.state.clockHz).toBe(10);
@@ -80,7 +80,7 @@ describe('DipDevice', () => {
     const { confirmed } = await device.writeConfig();
     expect(confirmed).toBe(true);
     expect(device.getSnapshot().savedToFlash).toBe(true);
-    expect(dip.flash?.defaultDesign).toBe(333);
+    expect(dip.flash.defaultDesign).toBe(333);
   });
 
   test('serializes concurrent commands', async () => {
@@ -108,6 +108,7 @@ describe('DipDevice', () => {
       defaultDesign: 7,
       defaultClockHz: 1000,
     });
+    await device.writeConfig();
     await device.restart();
     expect(device.getSnapshot().state).toEqual({ design: 7, clockHz: 1000 });
   });
