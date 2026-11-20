@@ -113,6 +113,18 @@ describe('DipDevice', () => {
     expect(device.getSnapshot().state).toEqual({ design: 7, clockHz: 1000 });
   });
 
+  test('restart discards the settings not saved to flash', async () => {
+    const { device } = await connect();
+    await device.selectDesign(3, 0);
+    await device.applySettings({ ...device.getSnapshot().settings, defaultDesign: 7 });
+    expect(device.getSnapshot().savedToFlash).toBe(false);
+    await device.restart();
+    expect(device.getSnapshot().settings.defaultDesign).toBe(0);
+    expect(device.getSnapshot().savedToFlash).toBe(true);
+    // Without a default design, the board keeps the design selected before the restart.
+    expect(device.getSnapshot().state).toEqual({ design: 3, clockHz: 0 });
+  });
+
   test('fails to start when the device is not a DIP', async () => {
     let onData: (chunk: string) => void = () => {};
     // Prints a prompt after every line, but never the key=value lines of read_shuttle().

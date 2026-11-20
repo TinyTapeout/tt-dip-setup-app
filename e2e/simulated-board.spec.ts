@@ -91,3 +91,26 @@ test('edits the start-up configuration and saves it to flash', async ({ page }) 
   await expect(page.getByTestId('state-design')).toHaveText('Design 333');
   await page.screenshot({ path: 'test-results/startup.png', fullPage: true });
 });
+
+test('asks before a restart discards settings not saved to flash', async ({ page }) => {
+  await connectSimulated(page);
+  await page.getByRole('tab', { name: 'Start-up' }).click();
+  await page.getByTestId('default-index').fill('12');
+  await page.getByRole('button', { name: 'Apply' }).click();
+  await expect(page.getByTestId('unsaved-chip')).toBeVisible();
+
+  const restart = page.getByRole('button', { name: 'Restart board' });
+  const dialog = page.getByRole('dialog', { name: 'Restart without saving?' });
+  const log = page.getByTestId('serial-log');
+  await restart.click();
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+  await expect(dialog).toBeHidden();
+  await expect(log).not.toContainText('> restart()');
+
+  await restart.click();
+  await dialog.getByRole('button', { name: 'Restart anyway' }).click();
+  await expect(page.getByText('Board restarted.')).toBeVisible();
+  await expect(log).toContainText('> restart()');
+  await expect(page.getByTestId('unsaved-chip')).toBeHidden();
+  await expect(page.getByTestId('default-index')).toHaveValue('0');
+});

@@ -9,6 +9,11 @@ import {
   Alert,
   Button,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   FormControl,
   FormControlLabel,
   FormHelperText,
@@ -47,6 +52,7 @@ export function StartupPanel(props: IStartupPanelProps) {
   const { working, run } = useAsyncAction();
   const { settings } = snapshot;
   const [draft, setDraft] = useState(settings);
+  const [confirmingRestart, setConfirmingRestart] = useState(false);
   const [resetClocks, setResetClocks] = useState(
     settings.resetOnLoadClocks || DEFAULT_RESET_CLOCKS,
   );
@@ -95,11 +101,15 @@ export function StartupPanel(props: IStartupPanelProps) {
       }
     });
 
-  const restart = () =>
-    run(async () => {
+  const restart = () => {
+    setConfirmingRestart(false);
+    return run(async () => {
       await props.device.restart();
       notify('Board restarted.', 'success');
     });
+  };
+
+  const requestRestart = () => (snapshot.savedToFlash ? restart() : setConfirmingRestart(true));
 
   const useCurrent = () =>
     patch({ defaultDesign: snapshot.state.design, defaultClockHz: snapshot.state.clockHz });
@@ -281,16 +291,32 @@ export function StartupPanel(props: IStartupPanelProps) {
           Revert
         </Button>
         <Button
-          onClick={restart}
+          onClick={requestRestart}
           variant="outlined"
           color="secondary"
           startIcon={<PowerSettingsNew />}
           disabled={busy}
-          title="Warm-boot the firmware to see the start-up behaviour"
+          title="Reload the settings from flash and run the start-up sequence"
         >
           Restart board
         </Button>
       </Stack>
+
+      <Dialog open={confirmingRestart} onClose={() => setConfirmingRestart(false)}>
+        <DialogTitle>Restart without saving?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            The board reloads its settings from flash when it restarts, so the settings you applied
+            but did not save to flash will be lost.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmingRestart(false)}>Cancel</Button>
+          <Button onClick={restart} color="warning">
+            Restart anyway
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
 }

@@ -51,7 +51,8 @@ Firefox 151+) is needed to connect to a real one.
 - `select_design()` stops the clock unless given a rate, so the app passes the rate when it is non-zero.
 - `src/dip/clock.ts` mirrors the firmware's `calc_pwm_nm()` (48 MHz timer, 24 MHz maximum), so the UI shows the
   quantized rate the board will actually produce before sending it.
-- `restart()` gets a 10 s timeout, since the boot sequence clocks the mux once per design index.
+- `restart()` reloads the settings from flash, so the app asks before restarting with unsaved settings. Loading
+  the default design clocks the mux once per design index (about 2 ms each), so `restart()` gets a 10 s timeout.
 - The app targets firmware v1.0.0 and later.
 
 ## License

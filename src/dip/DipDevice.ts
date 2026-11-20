@@ -306,9 +306,13 @@ export class DipDevice {
     return { confirmed: lines.some((line) => /Configuration saved/i.test(line)) };
   }
 
-  /** Warm-boots the firmware, which re-runs the autodetection and loads the default design. */
+  /**
+   * Warm-boots the firmware, which reloads the settings from flash (discarding unsaved ones), re-runs
+   * the autodetection and loads the default design.
+   */
   async restart() {
     const result = await this.sendCommand(commands.restart(), { timeoutMs: RESTART_TIMEOUT_MS });
+    this.updateSnapshot({ savedToFlash: true });
     await this.readShuttle();
     await this.syncSettings();
     await this.syncState();
